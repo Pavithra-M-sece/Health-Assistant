@@ -1,0 +1,10 @@
+2025-08-06 18:07:00,368 - INFO - ==================================================
+2025-08-06 18:07:00,890 - INFO - Installing server dependencies...
+2025-08-06 18:07:04,549 - INFO - Installing client dependencies...
+2025-08-06 18:07:09,386 - INFO - Installing AI service dependencies...
+2025-08-06 18:08:15,772 - INFO - 
+==================================================
+2025-08-06 18:08:15,793 - INFO -    • Frontend:  http://localhost:3000
+2025-08-06 18:08:15,794 - INFO -    • Backend:   http://localhost:5000
+2025-08-06 18:08:15,796 - INFO -    • AI Service: http://localhost:5000
+2025-08-06 18:08:15,806 - INFO - ==================================================
