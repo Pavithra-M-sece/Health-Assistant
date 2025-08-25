@@ -1,0 +1,33 @@
+{
+  "name": "healthcare-assistant",
+  "version": "1.0.0",
+  "description": "AI-powered healthcare assistant with symptom analysis and medicine recommendations",
+  "main": "start-all-services.js",
+  "scripts": {
+    "start": "node start-all-services.js",
+    "start:windows": "start-all.bat",
+    "start:powershell": "powershell -ExecutionPolicy Bypass -File start-all.ps1",
+    "dev": "node start-all-services.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "healthcare",
+    "ai",
+    "medicine",
+    "symptoms",
+    "react",
+    "node",
+    "python",
+    "flask"
+  ],
+  "author": "Healthcare Assistant Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "."
+  }
+}

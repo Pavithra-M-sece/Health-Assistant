@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; border-radius: 3px; }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Frontend Application Test</h1>
+        
+        <div class="test-section info">
+            <h3>Test 1: React App Accessibility</h3>
+            <button onclick="testReactApp()">Test React App</button>
+            <div id="react-result" class="result"></div>
+        </div>
+
+        <div class="test-section info">
+            <h3>Test 2: Backend Connectivity</h3>
+            <button onclick="testBackend()">Test Backend</button>
+            <div id="backend-result" class="result"></div>
+        </div>
+
+        <div class="test-section info">
+            <h3>Test 3: AI Service Connectivity</h3>
+            <button onclick="testAIService()">Test AI Service</button>
+            <div id="ai-result" class="result"></div>
+        </div>
+
+        <div class="test-section info">
+            <h3>Test 4: Full Login Flow</h3>
+            <button onclick="testLoginFlow()">Test Login Flow</button>
+            <div id="login-result" class="result"></div>
+        </div>
+
+        <div class="test-section info">
+            <h3>React App Preview</h3>
+            <p>If the React app is working, you should see it below:</p>
+            <iframe src="http://localhost:3000" title="React App"></iframe>
+        </div>
+    </div>
+
+    <script>
+        async function testReactApp() {
+            const resultDiv = document.getElementById('react-result');
+            resultDiv.innerHTML = 'Testing React app...';
+            
+            try {
+                const response = await fetch('http://localhost:3000');
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    if (html.includes('react') || html.includes('React') || html.includes('root')) {
+                        resultDiv.innerHTML = '<div class="success">✅ React app is accessible and serving content!</div>';
+                    } else {
+                        resultDiv.innerHTML = '<div class="error">❌ React app accessible but content seems wrong</div>';
+                    }
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ React app not accessible: ${response.status}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ React app error: ${error.message}</div>`;
+            }
+        }
+
+        async function testBackend() {
+            const resultDiv = document.getElementById('backend-result');
+            resultDiv.innerHTML = 'Testing backend...';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/health');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">✅ Backend is working!<br>Status: ${data.status}<br>Database: ${data.database}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Backend error: ${response.status}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Backend connection error: ${error.message}</div>`;
+            }
+        }
+
+        async function testAIService() {
+            const resultDiv = document.getElementById('ai-result');
+            resultDiv.innerHTML = 'Testing AI service...';
+            
+            try {
+                const response = await fetch('http://localhost:5001/ai/medicine-search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: 'headache', limit: 1 })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">✅ AI service is working!<br>Found ${data.total_results || 0} results</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ AI service error: ${response.status}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ AI service connection error: ${error.message}</div>`;
+            }
+        }
+
+        async function testLoginFlow() {
+            const resultDiv = document.getElementById('login-result');
+            resultDiv.innerHTML = 'Testing login flow...';
+            
+            try {
+                // Test login with existing user
+                const response = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'testuser123', password: 'testpassword123' })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.token) {
+                    resultDiv.innerHTML = `<div class="success">✅ Login flow working!<br>Token received: ${data.token.substring(0, 20)}...<br>User: ${data.user.username}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Login failed: ${data.message || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Login flow error: ${error.message}</div>`;
+            }
+        }
+
+        // Auto-run tests on page load
+        window.onload = function() {
+            setTimeout(testReactApp, 500);
+            setTimeout(testBackend, 1000);
+            setTimeout(testAIService, 1500);
+            setTimeout(testLoginFlow, 2000);
+        };
+    </script>
+</body>
+</html>

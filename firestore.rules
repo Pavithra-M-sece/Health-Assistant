@@ -1,0 +1,141 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions for security
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return request.auth != null && 
+             request.auth.token.admin == true;
+    }
+    
+    function isValidUser(userData) {
+      return userData.keys().hasAll(['username', 'email', 'createdAt']) &&
+             userData.username is string &&
+             userData.email is string &&
+             userData.createdAt is timestamp;
+    }
+    
+    function isValidMedicine(medicineData) {
+      return medicineData.keys().hasAll(['name', 'category', 'description']) &&
+             medicineData.name is string &&
+             medicineData.category is string &&
+             medicineData.description is string;
+    }
+
+    // Users collection - users can only access their own data
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && 
+                       isOwner(userId) && 
+                       isValidUser(resource.data);
+      
+      // User's private subcollections
+      match /health_records/{recordId} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+      
+      match /medications/{medicationId} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+      
+      match /appointments/{appointmentId} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+      
+      match /alerts/{alertId} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+    }
+    
+    // Medicine database - read-only for authenticated users, write for admins
+    match /medicines/{medicineId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isAdmin();
+      allow create: if isAuthenticated() && 
+                       isAdmin() && 
+                       isValidMedicine(resource.data);
+    }
+    
+    // Natural remedies - read-only for authenticated users
+    match /natural_remedies/{remedyId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isAdmin();
+    }
+    
+    // Health alerts - global alerts readable by all authenticated users
+    match /global_alerts/{alertId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isAdmin();
+    }
+    
+    // AI analysis results - users can only access their own
+    match /ai_analysis/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+      
+      match /sessions/{sessionId} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+    }
+    
+    // Doctor profiles - readable by authenticated users
+    match /doctors/{doctorId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && 
+                      (isOwner(doctorId) || isAdmin());
+    }
+    
+    // Appointments - users can only access their own appointments
+    match /appointments/{appointmentId} {
+      allow read, write: if isAuthenticated() && 
+                            (isOwner(resource.data.userId) || 
+                             isOwner(resource.data.doctorId));
+    }
+    
+    // System logs - admin only
+    match /system_logs/{logId} {
+      allow read, write: if isAuthenticated() && isAdmin();
+    }
+    
+    // Analytics data - admin only
+    match /analytics/{analyticsId} {
+      allow read, write: if isAuthenticated() && isAdmin();
+    }
+    
+    // Feedback and reviews
+    match /feedback/{feedbackId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && 
+                               isOwner(resource.data.userId);
+    }
+    
+    // App configuration - read-only for authenticated users
+    match /app_config/{configId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isAdmin();
+    }
+    
+    // Emergency contacts
+    match /emergency_contacts/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // Health insurance information
+    match /insurance/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
